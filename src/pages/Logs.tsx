@@ -32,7 +32,8 @@ const Logs = () => {
   useEffect(() => {
     const fetchLogStats = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/logs/stats', {
+        // Cambiar la URL a la de producción
+        const response = await axios.get('https://backend-seguridad-gzhy.onrender.com/logs/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setLogStats(response.data);
