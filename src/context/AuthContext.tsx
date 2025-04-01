@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import LogService from '../services/LogService';
 
 interface User {
   email: string;
@@ -64,6 +65,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string, authCode: string) => {
     try {
+      await LogService.logEvent({
+        event_type: 'AUTH_ATTEMPT',
+        component_name: 'LoginForm',
+        action_description: `Intento de inicio de sesión para ${email}`,
+      });
+
       console.log('Iniciando login con:', {
         email,
         hasAuthCode: !!authCode,
