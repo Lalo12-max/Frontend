@@ -32,27 +32,29 @@ const Logs = () => {
   useEffect(() => {
     const fetchLogStats = async () => {
       try {
-        console.log('Fetching log stats with token:', token);
+        console.log('Obteniendo estadísticas con token:', token);
         const response = await axios.get('https://backend-seguridad-gzhy.onrender.com/logs/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log('Log stats response:', response.data);
         
-        // Verify the structure of the response
-        console.log('Response structure:', {
-          hasData: !!response.data,
-          statusCodes: response.data?.byStatusCode,
-          successCount: response.data?.successCount,
-          errorCount: response.data?.errorCount
-        });
+        // Transformar los datos para el gráfico
+        const transformedData = {
+          byStatusCode: response.data.reduce((acc: any, item: any) => {
+            acc[item.status_code] = item.count;
+            return acc;
+          }, {}),
+          successCount: response.data.reduce((acc: number, item: any) => {
+            return item.status_code < 400 ? acc + parseInt(item.count) : acc;
+          }, 0),
+          errorCount: response.data.reduce((acc: number, item: any) => {
+            return item.status_code >= 400 ? acc + parseInt(item.count) : acc;
+          }, 0)
+        };
 
-        setLogStats(response.data);
+        console.log('Datos transformados:', transformedData);
+        setLogStats(transformedData);
       } catch (error: any) {
-        console.error('Error fetching log stats:', {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status
-        });
+        console.error('Error al obtener estadísticas:', error);
       }
     };
 
