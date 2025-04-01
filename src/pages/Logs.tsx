@@ -32,26 +32,41 @@ const Logs = () => {
   useEffect(() => {
     const fetchLogStats = async () => {
       try {
-        console.log('Iniciando fetchLogStats con token:', !!token);
+        console.log('Fetching log stats with token:', token);
         const response = await axios.get('https://backend-seguridad-gzhy.onrender.com/logs/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log('Respuesta de logs:', response.data);
-        setLogStats(response.data);
+        console.log('Log stats response:', response.data);
         
-        console.log('Datos para la gráfica:', {
-          statusCodes: Object.keys(response.data.byStatusCode || {}),
-          counts: Object.values(response.data.byStatusCode || {}),
-          successCount: response.data.successCount,
-          errorCount: response.data.errorCount
+        // Verify the structure of the response
+        console.log('Response structure:', {
+          hasData: !!response.data,
+          statusCodes: response.data?.byStatusCode,
+          successCount: response.data?.successCount,
+          errorCount: response.data?.errorCount
         });
-      } catch (error) {
-        console.error('Error detallado al obtener logs:', error);
+
+        setLogStats(response.data);
+      } catch (error: any) {
+        console.error('Error fetching log stats:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
       }
     };
 
     fetchLogStats();
   }, [token]);
+
+  // Add console log to check chartData structure
+  useEffect(() => {
+    console.log('Current logStats:', logStats);
+    console.log('Chart data structure:', {
+      labels: logStats ? Object.keys(logStats.byStatusCode) : [],
+      data: logStats ? Object.values(logStats.byStatusCode) : []
+    });
+  }, [logStats]);
 
   const chartData = {
     labels: logStats ? Object.keys(logStats.byStatusCode) : [],
