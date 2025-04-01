@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { io, Socket } from 'socket.io-client';
 
 interface User {
   email: string;
@@ -17,6 +18,7 @@ interface AuthContextType {
   logout: () => void;
   getLogs: () => Promise<any[]>;
   getLogStats: () => Promise<any[]>;
+  socket: Socket | null;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -36,10 +38,36 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   const API_URL = 'https://backend-seguridad-gzhy.onrender.com';
   const LOGS_URL = `${API_URL}/logs/stats`;
   const ALL_LOGS_URL = `${API_URL}/logs/all`;
+
+  // Inicializar Socket.io al cargar el componente
+  useEffect(() => {
+    const newSocket = io(API_URL);
+    
+    newSocket.on('connect', () => {
+      console.log('Conectado a Socket.io');
+    });
+    
+    newSocket.on('authCode', (data) => {
+      console.log('Código de autenticación recibido:', data);
+      alert(`${data.message}: ${data.code}`);
+    });
+    
+    newSocket.on('disconnect', () => {
+      console.log('Desconectado de Socket.io');
+    });
+    
+    setSocket(newSocket);
+    
+    // Limpiar socket al desmontar
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
 
   // Agregar estas nuevas funciones
   const getLogs = async () => {
@@ -231,9 +259,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isAuthenticated: !!user,
         login,
         register,
-        logout,    // Agregar estas nuevas funciones al contexto
+        logout,
         getLogs,
-        getLogStats
+        getLogStats,
+        socket
       }}
     >
       {children}
