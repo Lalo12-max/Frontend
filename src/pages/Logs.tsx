@@ -14,7 +14,6 @@ import {
   Legend
 } from 'chart.js';
 
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -42,10 +41,7 @@ const Logs = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        // Asegurarnos de que response.data es un array de LogData
         const data: LogData[] = response.data;
-        console.log('Datos recibidos:', data);
-
         const transformedData = {
           byStatusCode: data.reduce((acc, item) => {
             acc[item.status_code] = parseInt(item.count);
@@ -57,7 +53,6 @@ const Logs = () => {
             item.status_code >= 400 ? acc + parseInt(item.count) : acc, 0)
         };
 
-        console.log('Datos transformados:', transformedData);
         setLogStats(transformedData);
       } catch (error) {
         console.error('Error al obtener estadísticas:', error);
@@ -66,15 +61,6 @@ const Logs = () => {
 
     fetchLogStats();
   }, [token]);
-
-  // Add console log to check chartData structure
-  useEffect(() => {
-    console.log('Current logStats:', logStats);
-    console.log('Chart data structure:', {
-      labels: logStats ? Object.keys(logStats.byStatusCode) : [],
-      data: logStats ? Object.values(logStats.byStatusCode) : []
-    });
-  }, [logStats]);
 
   const chartData = {
     labels: logStats ? Object.keys(logStats.byStatusCode) : [],
