@@ -24,6 +24,12 @@ ChartJS.register(
   Legend
 );
 
+interface LogData {
+  status_code: number;
+  count: string;
+  date: string;
+}
+
 const Logs = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -32,28 +38,28 @@ const Logs = () => {
   useEffect(() => {
     const fetchLogStats = async () => {
       try {
-        console.log('Obteniendo estadísticas con token:', token);
         const response = await axios.get('https://backend-seguridad-gzhy.onrender.com/logs/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        // Transformar los datos para el gráfico
+        // Asegurarnos de que response.data es un array de LogData
+        const data: LogData[] = response.data;
+        console.log('Datos recibidos:', data);
+
         const transformedData = {
-          byStatusCode: response.data.reduce((acc: any, item: any) => {
-            acc[item.status_code] = item.count;
+          byStatusCode: data.reduce((acc, item) => {
+            acc[item.status_code] = parseInt(item.count);
             return acc;
-          }, {}),
-          successCount: response.data.reduce((acc: number, item: any) => {
-            return item.status_code < 400 ? acc + parseInt(item.count) : acc;
-          }, 0),
-          errorCount: response.data.reduce((acc: number, item: any) => {
-            return item.status_code >= 400 ? acc + parseInt(item.count) : acc;
-          }, 0)
+          }, {} as Record<number, number>),
+          successCount: data.reduce((acc, item) => 
+            item.status_code < 400 ? acc + parseInt(item.count) : acc, 0),
+          errorCount: data.reduce((acc, item) => 
+            item.status_code >= 400 ? acc + parseInt(item.count) : acc, 0)
         };
 
         console.log('Datos transformados:', transformedData);
         setLogStats(transformedData);
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error al obtener estadísticas:', error);
       }
     };
