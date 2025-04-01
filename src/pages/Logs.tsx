@@ -32,13 +32,21 @@ const Logs = () => {
   useEffect(() => {
     const fetchLogStats = async () => {
       try {
-        // Cambiar la URL a la de producción
+        console.log('Iniciando fetchLogStats con token:', !!token);
         const response = await axios.get('https://backend-seguridad-gzhy.onrender.com/logs/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
+        console.log('Respuesta de logs:', response.data);
         setLogStats(response.data);
+        
+        console.log('Datos para la gráfica:', {
+          statusCodes: Object.keys(response.data.byStatusCode || {}),
+          counts: Object.values(response.data.byStatusCode || {}),
+          successCount: response.data.successCount,
+          errorCount: response.data.errorCount
+        });
       } catch (error) {
-        console.error('Error fetching log stats:', error);
+        console.error('Error detallado al obtener logs:', error);
       }
     };
 
