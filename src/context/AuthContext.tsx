@@ -35,8 +35,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
-  const API_URL = 'http://localhost:3001';
-
+  // Cambiar esta línea
+  const API_URL = 'https://backend-seguridad-gzhy.onrender.com';
+  
   const login = async (email: string, password: string, authCode: string) => {
     try {
       console.log('Iniciando login con:', {
