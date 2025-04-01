@@ -15,6 +15,8 @@ interface AuthContextType {
   login: (email: string, password: string, authCode: string) => Promise<void>;
   register: (email: string, username: string, password: string) => Promise<{ secretKey: string, instrucciones: string[] }>;
   logout: () => void;
+  getLogs: () => Promise<any[]>;
+  getLogStats: () => Promise<any[]>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -35,9 +37,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
-  // Cambiar esta línea
   const API_URL = 'https://backend-seguridad-gzhy.onrender.com';
-  
+  const LOGS_URL = `${API_URL}/logs/stats`;
+  const ALL_LOGS_URL = `${API_URL}/logs/all`;
+
+  // Agregar estas nuevas funciones
+  const getLogs = async () => {
+    try {
+      const response = await axios.get(ALL_LOGS_URL);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener logs:', error);
+      throw new Error('Error al obtener los logs');
+    }
+  };
+
+  const getLogStats = async () => {
+    try {
+      const response = await axios.get(LOGS_URL);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener estadísticas:', error);
+      throw new Error('Error al obtener las estadísticas');
+    }
+  };
+
   const login = async (email: string, password: string, authCode: string) => {
     try {
       console.log('Iniciando login con:', {
@@ -207,7 +231,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isAuthenticated: !!user,
         login,
         register,
-        logout
+        logout,    // Agregar estas nuevas funciones al contexto
+        getLogs,
+        getLogStats
       }}
     >
       {children}
