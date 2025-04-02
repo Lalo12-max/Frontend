@@ -42,6 +42,8 @@ interface LogData {
   status_code: number;
   count: string;
   date: string;
+  method?: string;  // Añadido para métodos HTTP
+  route?: string;   // Añadido para rutas
 }
 
 const Logs = () => {
@@ -92,6 +94,19 @@ const Logs = () => {
       acc[item.status_code] = parseInt(item.count);
       return acc;
     }, {} as Record<number, number>),
+    byMethod: data.reduce((acc, item) => {
+      if (item.method) {
+        acc[item.method] = (acc[item.method] || 0) + parseInt(item.count);
+      }
+      return acc;
+    }, {} as Record<string, number>),
+    byRoute: data.reduce((acc, item) => {
+      if (item.route) {
+        const routeName = item.route.split('/')[1] || item.route; // Toma el primer segmento de la ruta
+        acc[routeName] = (acc[routeName] || 0) + parseInt(item.count);
+      }
+      return acc;
+    }, {} as Record<string, number>),
     successCount: data.reduce((acc, item) => 
       item.status_code < 400 ? acc + parseInt(item.count) : acc, 0),
     errorCount: data.reduce((acc, item) => 
@@ -161,6 +176,40 @@ const Logs = () => {
                       data={createChartData(securityLogStats, 'Logs de Seguridad')} 
                     />
                   </Box>
+                  {securityLogStats.byMethod && Object.keys(securityLogStats.byMethod).length > 0 && (
+                    <Box sx={{ mt: 4, height: 300 }}>
+                      <Bar 
+                        options={options('Distribución por Método HTTP - Seguridad')}
+                        data={{
+                          labels: Object.keys(securityLogStats.byMethod),
+                          datasets: [{
+                            label: 'Métodos HTTP',
+                            data: Object.values(securityLogStats.byMethod),
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                          }]
+                        }}
+                      />
+                    </Box>
+                  )}
+                  {securityLogStats.byRoute && Object.keys(securityLogStats.byRoute).length > 0 && (
+                    <Box sx={{ mt: 4, height: 300 }}>
+                      <Bar 
+                        options={options('Distribución por Ruta - Seguridad')}
+                        data={{
+                          labels: Object.keys(securityLogStats.byRoute),
+                          datasets: [{
+                            label: 'Rutas',
+                            data: Object.values(securityLogStats.byRoute),
+                            backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 1,
+                          }]
+                        }}
+                      />
+                    </Box>
+                  )}
                 </Box>
               ) : (
                 <Typography>Cargando estadísticas...</Typography>
