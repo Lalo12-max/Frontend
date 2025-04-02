@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const LOGS_URL = `${API_URL}/logs/stats`;
   const ALL_LOGS_URL = `${API_URL}/logs/all`;
 
-  // Inicializar Socket.io al cargar el componente
+  
   useEffect(() => {
     const newSocket = io(API_URL);
     
@@ -63,13 +63,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     setSocket(newSocket);
     
-    // Limpiar socket al desmontar
+    
     return () => {
       newSocket.disconnect();
     };
   }, []);
 
-  // Agregar estas nuevas funciones
+  
   const getLogs = async () => {
     try {
       const response = await axios.get(ALL_LOGS_URL);
