@@ -77,9 +77,33 @@ const Logs = () => {
         
         // Transform rate limit logs data
         const rateLimitData: LogData[] = rateLimitResponse.data;
+        console.log('%c Rate Limit Raw Data:', 'background: #ff6b6b; color: white; padding: 2px', {
+          hasMethod: rateLimitData.some(item => item.method),
+          hasRoute: rateLimitData.some(item => item.route),
+          sampleData: rateLimitData[0],
+          fullData: rateLimitData
+        });
+
         const transformedRateLimitData = transformLogData(rateLimitData);
-        console.log('%c Transformed Rate Limit Data:', 'background: #ff6b6b; color: white; padding: 2px;', transformedRateLimitData);
+        console.log('%c Rate Limit Transformed Data:', 'background: #ff6b6b; color: white; padding: 2px', {
+          hasMethodData: transformedRateLimitData.byMethod && Object.keys(transformedRateLimitData.byMethod).length > 0,
+          methodKeys: Object.keys(transformedRateLimitData.byMethod || {}),
+          hasRouteData: transformedRateLimitData.byRoute && Object.keys(transformedRateLimitData.byRoute).length > 0,
+          routeKeys: Object.keys(transformedRateLimitData.byRoute || {}),
+          fullStats: transformedRateLimitData
+        });
+
         setRateLimitLogStats(transformedRateLimitData);
+
+        // Add debug logs for render conditions
+        console.log('%c Rate Limit Render Conditions:', 'background: #ff6b6b; color: white; padding: 2px', {
+          byMethodExists: !!transformedRateLimitData.byMethod,
+          byMethodKeys: transformedRateLimitData.byMethod ? Object.keys(transformedRateLimitData.byMethod) : [],
+          byMethodLength: transformedRateLimitData.byMethod ? Object.keys(transformedRateLimitData.byMethod).length : 0,
+          byRouteExists: !!transformedRateLimitData.byRoute,
+          byRouteKeys: transformedRateLimitData.byRoute ? Object.keys(transformedRateLimitData.byRoute) : [],
+          byRouteLength: transformedRateLimitData.byRoute ? Object.keys(transformedRateLimitData.byRoute).length : 0
+        });
 
       } catch (error) {
         console.error('Error al obtener estadísticas:', error);
