@@ -24,7 +24,7 @@ ChartJS.register(
   Legend
 );
 
-// Create a custom grid layout using styled components
+
 const GridContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
@@ -42,9 +42,9 @@ interface LogData {
   status_code: number;
   count: string;
   date: string;
-  method?: string;  // Añadido para métodos HTTP
-  route?: string;   // Añadido para rutas
-  path?: string;  // Añadido para compatibilidad con el backend de Rate Limit
+  method?: string;  
+  route?: string;   
+  path?: string;  
 }
 
 const Logs = () => {
@@ -56,27 +56,27 @@ const Logs = () => {
   useEffect(() => {
     const fetchAllLogs = async () => {
       try {
-        // Fetch logs from security backend
+        
         const securityResponse = await axios.get('https://backend-seguridad-gzhy.onrender.com/logs/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
         console.log('Security Response:', securityResponse.data);
         
-        // Transform security logs data
+        
         const securityData: LogData[] = securityResponse.data;
         const transformedSecurityData = transformLogData(securityData);
         console.log('Transformed Security Data:', transformedSecurityData);
         setSecurityLogStats(transformedSecurityData);
 
-        // Fetch logs from rate limit backend
+        
         const rateLimitResponse = await axios.get('https://back-ratelimit.onrender.com/rate/logs/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
         console.log('%c Rate Limit Response:', 'background: #ff6b6b; color: white; padding: 2px;', rateLimitResponse.data);
         
-        // Transform rate limit logs data
+        
         const rateLimitData: LogData[] = rateLimitResponse.data;
         console.log('%c Rate Limit Raw Data:', 'background: #ff6b6b; color: white; padding: 2px', {
           hasMethod: rateLimitData.some(item => item.method),
@@ -96,7 +96,7 @@ const Logs = () => {
 
         setRateLimitLogStats(transformedRateLimitData);
 
-        // Add debug logs for render conditions
+        
         console.log('%c Rate Limit Render Conditions:', 'background: #ff6b6b; color: white; padding: 2px', {
           byMethodExists: !!transformedRateLimitData.byMethod,
           byMethodKeys: transformedRateLimitData.byMethod ? Object.keys(transformedRateLimitData.byMethod) : [],
