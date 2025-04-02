@@ -39,7 +39,7 @@ const RegisterAlert = ({ secretKey, onClose }: RegisterAlertProps) => {
         </Typography>
       </Box>
       
-      {/* Se ha eliminado la sección de instrucciones */}
+      
     </Alert>
   );
 };
