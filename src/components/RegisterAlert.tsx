@@ -1,12 +1,12 @@
-import { Alert, Box, Typography, List, ListItem } from '@mui/material';
+import { Alert, Box, Typography } from '@mui/material';
 
 interface RegisterAlertProps {
   secretKey: string;
-  instrucciones: string[];
+  instrucciones: string[]; // Keeping this for compatibility with parent component
   onClose: () => void;
 }
 
-const RegisterAlert = ({ secretKey, instrucciones, onClose }: RegisterAlertProps) => {
+const RegisterAlert = ({ secretKey, onClose }: RegisterAlertProps) => {
   return (
     <Alert 
       severity="success" 
@@ -39,18 +39,7 @@ const RegisterAlert = ({ secretKey, instrucciones, onClose }: RegisterAlertProps
         </Typography>
       </Box>
       
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="subtitle1" fontWeight="bold">
-          Instrucciones:
-        </Typography>
-        <List dense sx={{ pl: 2 }}>
-          {instrucciones.map((instruccion, index) => (
-            <ListItem key={index} sx={{ display: 'list-item', listStyleType: 'decimal' }}>
-              {instruccion}
-            </ListItem>
-          ))}
-        </List>
-      </Box>
+      {/* Se ha eliminado la sección de instrucciones */}
     </Alert>
   );
 };
