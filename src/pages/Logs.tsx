@@ -44,6 +44,7 @@ interface LogData {
   date: string;
   method?: string;  // Añadido para métodos HTTP
   route?: string;   // Añadido para rutas
+  path?: string;  // Añadido para compatibilidad con el backend de Rate Limit
 }
 
 const Logs = () => {
@@ -125,8 +126,9 @@ const Logs = () => {
       return acc;
     }, {} as Record<string, number>),
     byRoute: data.reduce((acc, item) => {
-      if (item.route) {
-        const routeName = item.route.split('/')[1] || item.route; // Toma el primer segmento de la ruta
+      const routePath = item.route || item.path; // Usar route o path
+      if (routePath) {
+        const routeName = routePath.split('/')[1] || routePath;
         acc[routeName] = (acc[routeName] || 0) + parseInt(item.count);
       }
       return acc;
