@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Container, TextField, Button, Typography, Alert } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 
-// Importa el componente de alerta
+
 import RegisterAlert from '../components/RegisterAlert';
 
 const Register = () => {
@@ -60,7 +60,7 @@ const Register = () => {
   
     try {
       const result = await register(formData.email, formData.username, formData.password);
-      setRegistrationInfo(result); // Guarda la información de registro
+      setRegistrationInfo(result); 
       // No navegamos inmediatamente a login para mostrar la alerta
     } catch (error: any) {
       setError(error.message);
@@ -70,7 +70,7 @@ const Register = () => {
   // Función para manejar el cierre de la alerta
   const handleAlertClose = () => {
     setRegistrationInfo(null);
-    navigate('/login'); // Navega a login después de cerrar la alerta
+    navigate('/login'); 
   };
   
   return (
