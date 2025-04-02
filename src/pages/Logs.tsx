@@ -58,19 +58,25 @@ const Logs = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         
+        console.log('Security Response:', securityResponse.data);
+        
+        // Transform security logs data
+        const securityData: LogData[] = securityResponse.data;
+        const transformedSecurityData = transformLogData(securityData);
+        console.log('Transformed Security Data:', transformedSecurityData);
+        setSecurityLogStats(transformedSecurityData);
+
         // Fetch logs from rate limit backend
         const rateLimitResponse = await axios.get('https://back-ratelimit.onrender.com/rate/logs/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
-
-        // Transform security logs data
-        const securityData: LogData[] = securityResponse.data;
-        const transformedSecurityData = transformLogData(securityData);
-        setSecurityLogStats(transformedSecurityData);
-
+        
+        console.log('Rate Limit Response:', rateLimitResponse.data);
+        
         // Transform rate limit logs data
         const rateLimitData: LogData[] = rateLimitResponse.data;
         const transformedRateLimitData = transformLogData(rateLimitData);
+        console.log('Transformed Rate Limit Data:', transformedRateLimitData);
         setRateLimitLogStats(transformedRateLimitData);
 
       } catch (error) {
