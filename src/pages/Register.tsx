@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Container, TextField, Button, Typography, Alert } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 
+// Importa el componente de alerta
+import RegisterAlert from '../components/RegisterAlert';
+
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
@@ -13,6 +16,14 @@ const Register = () => {
     password: '',
     confirmPassword: ''
   });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
 
   const validateForm = () => {
     if (!formData.email || !formData.username || !formData.password || !formData.confirmPassword) {
@@ -34,46 +45,51 @@ const Register = () => {
     return true;
   };
 
+  // Estado para la información de registro
+  const [registrationInfo, setRegistrationInfo] = useState<{
+    secretKey: string;
+    instrucciones: string[];
+  } | null>(null);
+  
+  // Función para manejar el envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
+  
     if (!validateForm()) return;
-
+  
     try {
-      await register(formData.email, formData.username, formData.password);
-      navigate('/login');
-    } catch (err) {
-      setError('Error al registrar el usuario');
+      const result = await register(formData.email, formData.username, formData.password);
+      setRegistrationInfo(result); // Guarda la información de registro
+      // No navegamos inmediatamente a login para mostrar la alerta
+    } catch (error: any) {
+      setError(error.message);
     }
   };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  
+  // Función para manejar el cierre de la alerta
+  const handleAlertClose = () => {
+    setRegistrationInfo(null);
+    navigate('/login'); // Navega a login después de cerrar la alerta
   };
-
+  
   return (
-    <Container maxWidth="xs">
-      <Box
-        sx={{
-          mt: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
+    <Container component="main" maxWidth="xs">
+      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography component="h1" variant="h5">
           Registro
         </Typography>
-        {error && (
-          <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
-            {error}
-          </Alert>
+        
+        {registrationInfo && (
+          <RegisterAlert 
+            secretKey={registrationInfo.secretKey}
+            instrucciones={registrationInfo.instrucciones}
+            onClose={handleAlertClose}
+          />
         )}
+        
+        {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
+        
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <TextField
             margin="normal"
