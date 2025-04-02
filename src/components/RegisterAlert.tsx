@@ -2,7 +2,7 @@ import { Alert, Box, Typography } from '@mui/material';
 
 interface RegisterAlertProps {
   secretKey: string;
-  instrucciones: string[]; // Keeping this for compatibility with parent component
+  instrucciones: string[]; 
   onClose: () => void;
 }
 
