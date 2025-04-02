@@ -237,6 +237,40 @@ const Logs = () => {
                       data={createChartData(rateLimitLogStats, 'Logs de Rate Limit')} 
                     />
                   </Box>
+                  {rateLimitLogStats.byMethod && Object.keys(rateLimitLogStats.byMethod).length > 0 && (
+                    <Box sx={{ mt: 4, height: 300 }}>
+                      <Bar 
+                        options={options('Distribución por Método HTTP - Rate Limit')}
+                        data={{
+                          labels: Object.keys(rateLimitLogStats.byMethod),
+                          datasets: [{
+                            label: 'Métodos HTTP',
+                            data: Object.values(rateLimitLogStats.byMethod),
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                          }]
+                        }}
+                      />
+                    </Box>
+                  )}
+                  {rateLimitLogStats.byRoute && Object.keys(rateLimitLogStats.byRoute).length > 0 && (
+                    <Box sx={{ mt: 4, height: 300 }}>
+                      <Bar 
+                        options={options('Distribución por Ruta - Rate Limit')}
+                        data={{
+                          labels: Object.keys(rateLimitLogStats.byRoute),
+                          datasets: [{
+                            label: 'Rutas',
+                            data: Object.values(rateLimitLogStats.byRoute),
+                            backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 1,
+                          }]
+                        }}
+                      />
+                    </Box>
+                  )}
                 </Box>
               ) : (
                 <Typography>Cargando estadísticas...</Typography>
