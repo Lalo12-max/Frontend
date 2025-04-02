@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Container, Box, Typography, Paper, Button } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -14,7 +15,6 @@ import {
   Legend
 } from 'chart.js';
 
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -23,6 +23,20 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+// Create a custom grid layout using styled components
+const GridContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing(3),
+}));
+
+const GridItem = styled(Box)(({ theme }) => ({
+  flex: '1 1 100%',
+  [theme.breakpoints.up('md')]: {
+    flex: '1 1 calc(50% - 12px)',
+  },
+}));
 
 interface LogData {
   status_code: number;
@@ -33,73 +47,65 @@ interface LogData {
 const Logs = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
-  const [logStats, setLogStats] = useState<any>(null);
+  const [securityLogStats, setSecurityLogStats] = useState<any>(null);
+  const [rateLimitLogStats, setRateLimitLogStats] = useState<any>(null);
 
   useEffect(() => {
-    const fetchLogStats = async () => {
+    const fetchAllLogs = async () => {
       try {
-        const response = await axios.get('https://backend-seguridad-gzhy.onrender.com/logs/stats', {
+        // Fetch logs from security backend
+        const securityResponse = await axios.get('https://backend-seguridad-gzhy.onrender.com/logs/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        // Asegurarnos de que response.data es un array de LogData
-        const data: LogData[] = response.data;
-        console.log('Datos recibidos:', data);
+        // Fetch logs from rate limit backend
+        const rateLimitResponse = await axios.get('https://back-ratelimit.onrender.com/rate/logs/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-        const transformedData = {
-          byStatusCode: data.reduce((acc, item) => {
-            acc[item.status_code] = parseInt(item.count);
-            return acc;
-          }, {} as Record<number, number>),
-          successCount: data.reduce((acc, item) => 
-            item.status_code < 400 ? acc + parseInt(item.count) : acc, 0),
-          errorCount: data.reduce((acc, item) => 
-            item.status_code >= 400 ? acc + parseInt(item.count) : acc, 0)
-        };
+        // Transform security logs data
+        const securityData: LogData[] = securityResponse.data;
+        const transformedSecurityData = transformLogData(securityData);
+        setSecurityLogStats(transformedSecurityData);
 
-        console.log('Datos transformados:', transformedData);
-        setLogStats(transformedData);
+        // Transform rate limit logs data
+        const rateLimitData: LogData[] = rateLimitResponse.data;
+        const transformedRateLimitData = transformLogData(rateLimitData);
+        setRateLimitLogStats(transformedRateLimitData);
+
       } catch (error) {
         console.error('Error al obtener estadísticas:', error);
       }
     };
 
-    fetchLogStats();
+    fetchAllLogs();
   }, [token]);
 
-  // Add console log to check chartData structure
-  useEffect(() => {
-    console.log('Current logStats:', logStats);
-    console.log('Chart data structure:', {
-      labels: logStats ? Object.keys(logStats.byStatusCode) : [],
-      data: logStats ? Object.values(logStats.byStatusCode) : []
-    });
-  }, [logStats]);
+  const transformLogData = (data: LogData[]) => ({
+    byStatusCode: data.reduce((acc, item) => {
+      acc[item.status_code] = parseInt(item.count);
+      return acc;
+    }, {} as Record<number, number>),
+    successCount: data.reduce((acc, item) => 
+      item.status_code < 400 ? acc + parseInt(item.count) : acc, 0),
+    errorCount: data.reduce((acc, item) => 
+      item.status_code >= 400 ? acc + parseInt(item.count) : acc, 0)
+  });
 
-  const chartData = {
+  const createChartData = (logStats: any, title: string) => ({
     labels: logStats ? Object.keys(logStats.byStatusCode) : [],
     datasets: [
       {
-        label: 'Número de Logs por Código de Estado',
+        label: title,
         data: logStats ? Object.values(logStats.byStatusCode) : [],
-        backgroundColor: [
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-        ],
-        borderColor: [
-          'rgba(75, 192, 192, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-        ],
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
       },
     ],
-  };
+  });
 
-  const options = {
+  const options = (title: string) => ({
     responsive: true,
     plugins: {
       legend: {
@@ -107,17 +113,17 @@ const Logs = () => {
       },
       title: {
         display: true,
-        text: 'Distribución de Logs por Código de Estado',
+        text: title,
       },
     },
-  };
+  });
 
   return (
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Estadísticas de Logs
+            Comparación de Logs
           </Typography>
           <Button 
             variant="contained" 
@@ -128,27 +134,61 @@ const Logs = () => {
           </Button>
         </Box>
         
-        <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-          {logStats ? (
-            <Box>
+        <GridContainer>
+          {/* Security Logs */}
+          <GridItem>
+            <Paper elevation={3} sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Resumen
+                Backend de Seguridad
               </Typography>
-              <Typography>
-                Logs exitosos: {logStats.successCount}
+              {securityLogStats ? (
+                <Box>
+                  <Typography>
+                    Logs exitosos: {securityLogStats.successCount}
+                  </Typography>
+                  <Typography>
+                    Logs de error: {securityLogStats.errorCount}
+                  </Typography>
+                  <Box sx={{ mt: 4, height: 300 }}>
+                    <Bar 
+                      options={options('Distribución de Logs - Seguridad')} 
+                      data={createChartData(securityLogStats, 'Logs de Seguridad')} 
+                    />
+                  </Box>
+                </Box>
+              ) : (
+                <Typography>Cargando estadísticas...</Typography>
+              )}
+            </Paper>
+          </GridItem>
+
+          {/* Rate Limit Logs */}
+          <GridItem>
+            <Paper elevation={3} sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Backend de Rate Limit
               </Typography>
-              <Typography>
-                Logs de error: {logStats.errorCount}
-              </Typography>
-              
-              <Box sx={{ mt: 4, height: 400 }}>
-                <Bar options={options} data={chartData} />
-              </Box>
-            </Box>
-          ) : (
-            <Typography>Cargando estadísticas...</Typography>
-          )}
-        </Paper>
+              {rateLimitLogStats ? (
+                <Box>
+                  <Typography>
+                    Logs exitosos: {rateLimitLogStats.successCount}
+                  </Typography>
+                  <Typography>
+                    Logs de error: {rateLimitLogStats.errorCount}
+                  </Typography>
+                  <Box sx={{ mt: 4, height: 300 }}>
+                    <Bar 
+                      options={options('Distribución de Logs - Rate Limit')} 
+                      data={createChartData(rateLimitLogStats, 'Logs de Rate Limit')} 
+                    />
+                  </Box>
+                </Box>
+              ) : (
+                <Typography>Cargando estadísticas...</Typography>
+              )}
+            </Paper>
+          </GridItem>
+        </GridContainer>
       </Box>
     </Container>
   );
