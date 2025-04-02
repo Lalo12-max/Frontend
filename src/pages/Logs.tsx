@@ -71,12 +71,12 @@ const Logs = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        console.log('Rate Limit Response:', rateLimitResponse.data);
+        console.log('%c Rate Limit Response:', 'background: #ff6b6b; color: white; padding: 2px;', rateLimitResponse.data);
         
         // Transform rate limit logs data
         const rateLimitData: LogData[] = rateLimitResponse.data;
         const transformedRateLimitData = transformLogData(rateLimitData);
-        console.log('Transformed Rate Limit Data:', transformedRateLimitData);
+        console.log('%c Transformed Rate Limit Data:', 'background: #ff6b6b; color: white; padding: 2px;', transformedRateLimitData);
         setRateLimitLogStats(transformedRateLimitData);
 
       } catch (error) {
