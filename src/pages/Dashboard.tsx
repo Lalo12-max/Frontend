@@ -34,7 +34,7 @@ const Dashboard = () => {
             <strong>Alumno:</strong> EDUARDO ALEJANDRO CABELLO HERNANDEZ
           </Typography>
           <Typography variant="body1" paragraph>
-            <strong>Docente:</strong> Emmanuel Martínez Hernández
+            <strong>Docente:</strong> Emmanuel Martínez Hernández M.C.C
           </Typography>
           <Typography variant="body1" paragraph>
             <strong>Grado:</strong> Técnico Superior Universitario
